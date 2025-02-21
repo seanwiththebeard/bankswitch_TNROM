@@ -12,6 +12,7 @@ PRG ROM segments (CODE0-CODE6, CODE).
 #define NES_MAPPER 4		// Mapper 4 (MMC3)
 #define NES_PRG_BANKS 4		// # of 16KB PRG banks
 #define NES_CHR_BANKS 1		// # of 8KB CHR banks
+//NES_CHR_BANKS CANNOT BE 0, emulator expects at least 1, specify 0 in header section of crt0.s
 
 #include <peekpoke.h>
 #include <string.h>
