@@ -1,4 +1,3 @@
-
 /*
 Bank-switching using the MMC3 mapper.
 We use a special linker config that sets up
@@ -12,15 +11,20 @@ PRG ROM segments (CODE0-CODE6, CODE).
 #define NES_MAPPER 4		// Mapper 4 (MMC3)
 #define NES_PRG_BANKS 4		// # of 16KB PRG banks
 #define NES_CHR_BANKS 1		// # of 8KB CHR banks
-//NES_CHR_BANKS CANNOT BE 0, emulator expects at least 1, specify 0 in header section of crt0.s
 
 #include <peekpoke.h>
 #include <string.h>
 #include "neslib.h"
+#include <_heap.h>
+
 //#resource "nesbanked_MMC3.cfg"
 #define CFGFILE nesbanked_MMC3.cfg
+////#resource "crt0.o"
+
 // link the pattern table into CHR ROM
 //#link "chr_generic.s"
+//#link "chr_generic_rom.s"
+
 //#resource "tileset.bin"
 
 #define MMC_MODE 0x00
@@ -47,6 +51,9 @@ PRG ROM segments (CODE0-CODE6, CODE).
 #define MMC3_WRAM_ENABLE() POKE(0xA001, 0x80)
 #define MMC3_WRAM_READ_ONLY() POKE(0xA001, 0xC0)
 
+#pragma code-name("STARTUP")
+
+
 #pragma rodata-name("CODE0")
 const unsigned char TEXT0[]={"Bank 0 @ 8000"};
 #pragma rodata-name("CODE1")
@@ -55,6 +62,7 @@ const unsigned char TEXT1[]={"Bank 1 @ 8000"};
 const unsigned char TEXT5[]={"Bank 5 @ A000"};
 #pragma rodata-name("CODE6")
 const unsigned char TEXT6[]={"Bank 6 @ C000"};
+#pragma rodata-name("RODATA")
 
 // put functions in bank 1
 #pragma code-name("CODE1")
@@ -65,7 +73,7 @@ void draw_text(word addr, const char* text) {
 }
 
 // back to main code segment
-#pragma code-name("CODE")
+#pragma code-name("STARTUP")
 
 void UploadCharset()
 {
@@ -89,19 +97,22 @@ void DrawChars()
       ++z;
     }
 }
+
+byte x, y = 0;
+int *heaporg = (int*)&_heaporg;
+int *heapptr = (int*)&_heapptr;
+int *heapend = (int*)&_heapend;
 void main(void)
 {
-  byte x, y = 0;
-  #include <_heap.h>
-  int *heaporg = (int*)&_heaporg;
-  int *heapptr = (int*)&_heapptr;
-  int *heapend = (int*)&_heapend;
+  MMC3_PRG_8000(0);
+  MMC3_PRG_A000(0);
+  MMC3_WRAM_ENABLE();
+  
   heaporg[0] = 0x7000; //heaporg
   heapptr[0] = heaporg[0]; //heapptr
   heapend[0] = 0x8000; //heapend
   memset((int*)heaporg[0], 0, heapend[0] - heaporg[0]); 
   
-  MMC3_WRAM_ENABLE();
   
   // set palette colors
   pal_col(1,0x04);
@@ -110,10 +121,11 @@ void main(void)
   // setup CHR bank switching for background
   MMC3_CHR_0000(0);
   MMC3_CHR_0800(2);
-  //MMC3_CHR_1000(0);
-  //MMC3_CHR_1400(1);
-  //MMC3_CHR_1800(2);
-  //MMC3_CHR_1C00(3);  
+  
+  MMC3_CHR_1000(4);
+  MMC3_CHR_1400(5);
+  MMC3_CHR_1800(6);
+  MMC3_CHR_1C00(7);  
   
   UploadCharset();
   DrawChars();
@@ -130,7 +142,10 @@ void main(void)
   MMC3_PRG_A000(5);
   draw_text(NTADR_A(2,22), TEXT5);
   // $c000-$dfff is fixed to bank 6
-  draw_text(NTADR_A(2,23), TEXT6);  
+  draw_text(NTADR_A(2,23), TEXT6);
+  
+  MMC3_PRG_8000(0);
+  MMC3_PRG_A000(0);
   
   //enable rendering
   ppu_on_all();
