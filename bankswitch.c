@@ -27,7 +27,11 @@ PRG ROM segments (CODE0-CODE6, CODE).
 
 //#resource "tileset.bin"
 
-#define MMC_MODE 0x00
+//; Flip Background and Sprite Tables?
+//; 2 Background, 4 Sprite 0x00 - Backgrounds are the first page, Sprites are the second
+//; 4 Background, 2 Sprite 0x80 - Sprites are the first page, Backgrounds are the second
+//; You always have 2 slots of 2kb for the first page, and 4 slots of 1kb for the second
+#define MMC_MODE 0x80
 
 #define MMC3_SET_REG(r,n)\
 	POKE(0x8000, MMC_MODE|(r));\
@@ -119,12 +123,12 @@ void main(void)
   pal_col(2,0x20);
   pal_col(3,0x30);
   // setup CHR bank switching for background
-  MMC3_CHR_0000(0);
-  MMC3_CHR_0800(2);
+  MMC3_CHR_0000(4);
+  MMC3_CHR_0800(6);
   
-  MMC3_CHR_1000(4);
-  MMC3_CHR_1400(5);
-  MMC3_CHR_1800(6);
+  MMC3_CHR_1000(0);
+  MMC3_CHR_1400(1);
+  MMC3_CHR_1800(2);
   MMC3_CHR_1C00(7);  
   
   UploadCharset();
@@ -152,8 +156,8 @@ void main(void)
   
   while(1)
   {
-    MMC3_CHR_0800(++x);
-    for (y = 0; y < 10; ++y)ppu_wait_nmi();
+    MMC3_CHR_1C00(++x);
+    for (y = 0; y < 20; ++y)ppu_wait_nmi();
   }
   while(1);//do nothing, infinite loop
 }
