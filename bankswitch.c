@@ -27,7 +27,7 @@ PRG ROM segments (CODE0-CODE6, CODE).
 
 //#resource "tileset.bin"
 
-//; Flip Background and Sprite Tables?
+//; Invert Background and Sprite Tables?
 //; 2 Background, 4 Sprite 0x00 - Backgrounds are the first page, Sprites are the second
 //; 4 Background, 2 Sprite 0x80 - Sprites are the first page, Backgrounds are the second
 //; You always have 2 slots of 2kb for the first page, and 4 slots of 1kb for the second
