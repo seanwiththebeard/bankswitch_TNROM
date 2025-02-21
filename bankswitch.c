@@ -62,7 +62,7 @@ const unsigned char TEXT1[]={"Bank 1 @ 8000"};
 const unsigned char TEXT5[]={"Bank 5 @ A000"};
 #pragma rodata-name("CODE6")
 const unsigned char TEXT6[]={"Bank 6 @ C000"};
-#pragma rodata-name("RODATA")
+#pragma rodata-name("RODATA") //Restore default location for future read-only data
 
 // put functions in bank 1
 #pragma code-name("CODE1")
